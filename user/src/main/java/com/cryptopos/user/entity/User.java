@@ -13,5 +13,6 @@ public record User(
         String email,
         String password,
         boolean isActive,
-        boolean isVerified) {
+        boolean isVerified,
+        UUID roleId) {
 }

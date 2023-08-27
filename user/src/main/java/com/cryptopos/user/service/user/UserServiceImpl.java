@@ -1,5 +1,6 @@
 package com.cryptopos.user.service.user;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.cryptopos.user.dto.SignUpRequest;
@@ -14,10 +15,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository uRepository, RoleRepository rRepository) {
+    public UserServiceImpl(UserRepository uRepository, RoleRepository rRepository, PasswordEncoder encoder) {
         this.userRepository = uRepository;
         this.roleRepository = rRepository;
+        this.passwordEncoder = encoder;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class UserServiceImpl implements UserService {
                                             signUpRequest.firstName(),
                                             signUpRequest.lastName(),
                                             signUpRequest.email(),
-                                            signUpRequest.password(),
+                                            passwordEncoder.encode(signUpRequest.password()),
                                             true,
                                             true,
                                             role.id());

@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
                 .flatMap(existingUser -> Mono.just(false))
                 .switchIfEmpty(
                         roleRepository
-                                .findByName("GLOBAL_ADMINISTRATOR")
+                                .findByName("ROLE_GLOBAL_ADMINISTRATOR")
                                 .flatMap(role -> {
 
                                     var user = new User(

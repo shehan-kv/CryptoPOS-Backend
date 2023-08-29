@@ -17,10 +17,17 @@ import org.springframework.security.web.server.authentication.logout.HttpStatusR
 import org.springframework.security.web.server.authentication.logout.WebSessionServerLogoutHandler;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 
+import com.cryptopos.user.security.AppReactiveUserDetailsService;
+
 import reactor.core.publisher.Mono;
 
 @Configuration
 public class SecurityConfig {
+
+    @Bean
+    public AppReactiveUserDetailsService userDetailsService() {
+        return new AppReactiveUserDetailsService();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -50,12 +57,15 @@ public class SecurityConfig {
                         })
                         .authenticationFailureHandler(
                                 new ServerAuthenticationEntryPointFailureHandler(
-                                        new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED)))
+                                        new HttpStatusServerEntryPoint(
+                                                HttpStatus.UNAUTHORIZED)))
 
-                        .authenticationEntryPoint(new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(
+                                new HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED))
 
                         .requiresAuthenticationMatcher(
-                                new PathPatternParserServerWebExchangeMatcher("/signin", HttpMethod.POST))
+                                new PathPatternParserServerWebExchangeMatcher("/signin",
+                                        HttpMethod.POST))
 
                 )
                 .logout(customizer -> customizer

@@ -20,11 +20,6 @@ public class SecurityConfig {
     public SecurityWebFilterChain webFilterChain(ServerHttpSecurity http) {
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeExchange(authorize -> authorize
-                        .pathMatchers("/hello")
-                        .hasRole("GLOBAL_ADMINISTRATOR")
-
-                )
                 .formLogin(customizer -> customizer.disable())
                 .httpBasic(customizer -> customizer.disable())
                 .build();

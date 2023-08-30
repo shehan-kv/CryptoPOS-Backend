@@ -11,6 +11,12 @@ spring:
             - Path=/user/**
           filters:
             - RewritePath=/user/?(?<segment>.*), /$\{segment}
+        - id: org-route
+          uri: ${ORG_URI}
+          predicates:
+            - Path=/org/**
+          filters:
+            - RewritePath=/org/?(?<segment>.*), /$\{segment}
 
       globalcors:
         cors-configurations:

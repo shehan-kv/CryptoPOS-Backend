@@ -57,7 +57,7 @@ public class OrgServiceImpl implements OrgService {
 
                     return orgRepository.save(newOrg);
                 })
-                .zipWhen(savedOrg -> {
+                .flatMap(savedOrg -> {
                     Branch newBranch = new Branch(
                             null,
                             createRequest.branchLocation(),
@@ -67,7 +67,7 @@ public class OrgServiceImpl implements OrgService {
                     return branchRepository
                             .save(newBranch);
                 })
-                .zipWhen(tuple -> {
+                .zipWhen(branch -> {
 
                     return ReactiveSecurityContextHolder
                             .getContext()
@@ -76,13 +76,11 @@ public class OrgServiceImpl implements OrgService {
                 })
                 .flatMap(tuple -> {
 
-                    Org org = tuple.getT1().getT1();
-                    Branch branch = tuple.getT1().getT2();
+                    Branch branch = tuple.getT1();
                     Long userId = Long.parseLong(tuple.getT2());
 
                     return employeeRepository
-                            .saveOrg(userId, org.id())
-                            .flatMap(savedOrgId -> employeeRepository.saveBranch(userId, branch.id()));
+                            .saveBranch(userId, branch.id());
 
                 })
                 .flatMap(savedId -> Mono.just(true));

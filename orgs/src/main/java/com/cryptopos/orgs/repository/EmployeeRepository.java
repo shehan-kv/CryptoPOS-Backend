@@ -14,16 +14,6 @@ public class EmployeeRepository {
         this.databaseClient = dClient;
     }
 
-    public Mono<Long> saveOrg(Long userId, Long orgId) {
-
-        return databaseClient
-                .sql("INSERT INTO employee_orgs (employee_id, org_id) VALUES (:userId, :orgId)")
-                .bind("userId", userId)
-                .bind("orgId", orgId)
-                .fetch()
-                .rowsUpdated();
-    }
-
     public Mono<Long> saveBranch(Long userId, Long branchId) {
 
         return databaseClient

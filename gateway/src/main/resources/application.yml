@@ -23,6 +23,7 @@ spring:
           "[/**]":
             allowedOrigins: ${CORS_ORIGIN}
             allowedHeaders: ${CORS_HEADERS}
+            allowCredentials: true
             allowedMethods:
               - GET
               - POST

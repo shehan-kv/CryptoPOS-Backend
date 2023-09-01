@@ -24,4 +24,14 @@ public class EmployeeRepository {
                 .rowsUpdated();
     }
 
+    public Mono<Long> saveBranch(Long userId, Long branchId) {
+
+        return databaseClient
+                .sql("INSERT INTO employee_branches (employee_id, branch_id) VALUES (:userId, :branchId)")
+                .bind("userId", userId)
+                .bind("branchId", branchId)
+                .fetch()
+                .rowsUpdated();
+    }
+
 }

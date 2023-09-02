@@ -24,7 +24,7 @@ public class AppReactiveUserDetailsService implements ReactiveUserDetailsService
                 .flatMap(user -> {
                     UserDetails userDetails = User
                             .builder()
-                            .username(user.email())
+                            .username(user.id().toString())
                             .password(user.password())
                             .accountExpired(false)
                             .disabled(!user.isActive())

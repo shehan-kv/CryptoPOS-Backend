@@ -13,7 +13,7 @@ public interface UserRepository extends ReactiveCrudRepository<User, Long> {
     Mono<User> findByEmail(String email);
 
     @Query(value = """
-            SELECT u.email, u.password, u.is_active, u.is_verified, r.name AS role
+            SELECT u.id, u.password, u.is_active, u.is_verified, r.name AS role
             FROM USERS u
             JOIN ROLES r ON r.id = u.role_id
             WHERE u.email = :email

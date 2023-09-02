@@ -1,7 +1,7 @@
 package com.cryptopos.user.dto;
 
 public record UserDetailsAuthResult(
-        String email,
+        Long id,
         String password,
         Boolean isActive,
         Boolean isVerified,

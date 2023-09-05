@@ -7,6 +7,7 @@ import com.cryptopos.orgs.dto.OrgResult;
 import com.cryptopos.orgs.entity.Org;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface OrgRepository extends ReactiveCrudRepository<Org, Long> {
 
@@ -30,4 +31,11 @@ public interface OrgRepository extends ReactiveCrudRepository<Org, Long> {
                 """)
     Flux<OrgResult> findOrgsByUser(Long userId, int offset, int pageSize);
 
+    @Query("""
+            SELECT COUNT(DISTINCT b.org_id)
+            FROM branches b
+            INNER JOIN employee_branches eb ON eb.branch_id = b.id
+            WHERE eb.employee_id = :userId
+            """)
+    Mono<Long> countOrgsByUser(Long userId);
 }

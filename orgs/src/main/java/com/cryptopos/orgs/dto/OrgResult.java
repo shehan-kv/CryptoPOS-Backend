@@ -5,6 +5,7 @@ public record OrgResult(
         String name,
         String currency,
         String country,
-        boolean isActive) {
+        boolean isActive,
+        Long employees) {
 
 }

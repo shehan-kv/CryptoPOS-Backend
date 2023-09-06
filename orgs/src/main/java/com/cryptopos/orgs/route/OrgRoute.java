@@ -15,6 +15,7 @@ public class OrgRoute {
     @Bean
     public RouterFunction<ServerResponse> orgRoutes(OrgHandler handler) {
         return RouterFunctions
-                .route(RequestPredicates.POST("/"), handler::createOrg);
+                .route(RequestPredicates.POST("/"), handler::createOrg)
+                .andRoute(RequestPredicates.GET("/"), handler::getOrgDetailsByUser);
     }
 }

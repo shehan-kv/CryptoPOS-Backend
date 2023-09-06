@@ -26,4 +26,11 @@ public class OrgHandler {
                 .flatMap(createResult -> ServerResponse.status(HttpStatus.CREATED).build())
                 .onErrorResume(error -> ServerResponse.badRequest().build());
     }
+
+    public Mono<ServerResponse> getOrgDetailsByUser(ServerRequest request) {
+        return orgService
+                .getOrgDetailsByUser(request.queryParam("page"), request.queryParam("size"))
+                .flatMap(result -> ServerResponse.ok().bodyValue(result));
+
+    }
 }

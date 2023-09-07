@@ -16,6 +16,7 @@ public class OrgRoute {
     public RouterFunction<ServerResponse> orgRoutes(OrgHandler handler) {
         return RouterFunctions
                 .route(RequestPredicates.POST("/"), handler::createOrg)
-                .andRoute(RequestPredicates.GET("/"), handler::getOrgDetailsByUser);
+                .andRoute(RequestPredicates.GET("/"), handler::getOrgDetailsByUser)
+                .andRoute(RequestPredicates.PUT("/{orgId}"), handler::updateOrg);
     }
 }

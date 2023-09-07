@@ -45,4 +45,11 @@ public interface OrgRepository extends ReactiveCrudRepository<Org, Long> {
     @Query("UPDATE orgs SET name = :name, is_active = :isActive WHERE id = :id")
     Mono<Long> updateOrg(@Param("id") Long id, @Param("name") String name, @Param("isActive") boolean isActive);
 
+    @Query("""
+            SELECT DISTINCT b.org_id
+            FROM branches b
+            INNER JOIN employee_branches eb ON eb.branch_id = b.id
+            WHERE eb.employee_id = :userId
+            """)
+    Flux<Long> findOrgIdsByUser(Long userId);
 }

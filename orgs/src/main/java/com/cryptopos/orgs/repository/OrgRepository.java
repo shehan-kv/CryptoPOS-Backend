@@ -1,6 +1,8 @@
 package com.cryptopos.orgs.repository;
 
+import org.springframework.data.r2dbc.repository.Modifying;
 import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 import com.cryptopos.orgs.dto.OrgResult;
@@ -38,4 +40,9 @@ public interface OrgRepository extends ReactiveCrudRepository<Org, Long> {
             WHERE eb.employee_id = :userId
             """)
     Mono<Long> countOrgsByUser(Long userId);
+
+    @Modifying
+    @Query("UPDATE orgs SET name = :name, is_active = :isActive WHERE id = :id")
+    Mono<Long> updateOrg(@Param("id") Long id, @Param("name") String name, @Param("isActive") boolean isActive);
+
 }

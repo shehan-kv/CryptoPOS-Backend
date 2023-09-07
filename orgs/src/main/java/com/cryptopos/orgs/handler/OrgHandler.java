@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.cryptopos.orgs.dto.CreateOrgRequest;
+import com.cryptopos.orgs.dto.OrgUpdateRequest;
 import com.cryptopos.orgs.service.org.OrgService;
 
 import reactor.core.publisher.Mono;
@@ -32,5 +33,25 @@ public class OrgHandler {
                 .getOrgDetailsByUser(request.queryParam("page"), request.queryParam("size"))
                 .flatMap(result -> ServerResponse.ok().bodyValue(result));
 
+    }
+
+    public Mono<ServerResponse> updateOrg(ServerRequest request) {
+        return request
+                .bodyToMono(OrgUpdateRequest.class)
+                .flatMap(updateRequest -> orgService
+                        .updateOrg(
+                                Long.parseLong(request.pathVariable("orgId")),
+                                updateRequest))
+                .flatMap(result -> {
+                    if (result.isAuthError()) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    if (result.isSuccess()) {
+                        return ServerResponse.ok().build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
     }
 }

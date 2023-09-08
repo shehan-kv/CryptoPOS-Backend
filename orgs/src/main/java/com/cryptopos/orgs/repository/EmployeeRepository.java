@@ -3,6 +3,7 @@ package com.cryptopos.orgs.repository;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -22,6 +23,16 @@ public class EmployeeRepository {
                 .bind("branchId", branchId)
                 .fetch()
                 .rowsUpdated();
+    }
+
+    public Flux<Long> getBranches(Long userId) {
+
+        return databaseClient
+                .sql("SELECT branch_id FROM employee_branches WHERE employee_id = :userId")
+                .bind("userId", userId)
+                .fetch()
+                .all()
+                .map(row -> (Long) row.get("branch_id"));
     }
 
 }

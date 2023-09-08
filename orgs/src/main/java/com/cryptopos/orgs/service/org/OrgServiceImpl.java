@@ -167,10 +167,22 @@ public class OrgServiceImpl implements OrgService {
                         return Mono.just(new OrgUpdateResult(false, true));
                     }
 
-                    return orgRepository
-                            .updateOrg(orgId, updateRequest.name(), updateRequest.isActive())
-                            .map(result -> result > 0 ? new OrgUpdateResult(true, false)
-                                    : new OrgUpdateResult(false, false));
+                    if (updateRequest.isActive()) {
+
+                        return orgRepository
+                                .updateOrg(orgId, updateRequest.name(), updateRequest.isActive())
+                                .map(result -> result > 0 ? new OrgUpdateResult(true, false)
+                                        : new OrgUpdateResult(false, false));
+
+                    } else {
+
+                        return orgRepository
+                                .updateOrg(orgId, updateRequest.name(), updateRequest.isActive())
+                                .flatMap(result -> branchRepository.disableBranches(orgId))
+                                .map(result -> result > 0 ? new OrgUpdateResult(true, false)
+                                        : new OrgUpdateResult(false, false));
+
+                    }
                 });
     }
 

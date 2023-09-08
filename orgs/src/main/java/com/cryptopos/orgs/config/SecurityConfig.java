@@ -31,6 +31,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/{orgId}")
                         .hasRole("GLOBAL_ADMINISTRATOR")
 
+                        .pathMatchers(HttpMethod.POST, "/branch")
+                        .hasRole("GLOBAL_ADMINISTRATOR")
+
                 )
                 .formLogin(customizer -> customizer.disable())
                 .httpBasic(customizer -> customizer.disable())

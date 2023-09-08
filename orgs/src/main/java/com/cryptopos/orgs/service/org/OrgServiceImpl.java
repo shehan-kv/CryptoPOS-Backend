@@ -11,6 +11,8 @@ import com.cryptopos.orgs.dto.BranchResult;
 import com.cryptopos.orgs.dto.CreateOrgRequest;
 import com.cryptopos.orgs.dto.OrgDetailsResponse;
 import com.cryptopos.orgs.dto.OrgResult;
+import com.cryptopos.orgs.dto.OrgUpdateRequest;
+import com.cryptopos.orgs.dto.OrgUpdateResult;
 import com.cryptopos.orgs.dto.Page;
 import com.cryptopos.orgs.repository.BranchRepository;
 import com.cryptopos.orgs.repository.CountryRepository;
@@ -150,6 +152,37 @@ public class OrgServiceImpl implements OrgService {
                     var orgList = tuple.getT1();
                     var pageCount = Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeInt), 1);
                     return new Page<OrgDetailsResponse>(pageNumInt, pageSizeInt, pageCount, orgList);
+                });
+    }
+
+    @Override
+    public Mono<OrgUpdateResult> updateOrg(Long orgId, OrgUpdateRequest updateRequest) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> orgRepository.findOrgIdsByUser(Long.parseLong(userId)).collectList())
+                .flatMap(orgIdList -> {
+
+                    if (!orgIdList.contains(orgId)) {
+                        return Mono.just(new OrgUpdateResult(false, true));
+                    }
+
+                    if (updateRequest.isActive()) {
+
+                        return orgRepository
+                                .updateOrg(orgId, updateRequest.name(), updateRequest.isActive())
+                                .map(result -> result > 0 ? new OrgUpdateResult(true, false)
+                                        : new OrgUpdateResult(false, false));
+
+                    } else {
+
+                        return orgRepository
+                                .updateOrg(orgId, updateRequest.name(), updateRequest.isActive())
+                                .flatMap(result -> branchRepository.disableBranches(orgId))
+                                .map(result -> result > 0 ? new OrgUpdateResult(true, false)
+                                        : new OrgUpdateResult(false, false));
+
+                    }
                 });
     }
 

@@ -15,6 +15,7 @@ public class BranchRoute {
     @Bean
     public RouterFunction<ServerResponse> branchRoutes(BranchHandler handler) {
         return RouterFunctions
-                .route(RequestPredicates.POST("/branch"), handler::createBranch);
+                .route(RequestPredicates.POST("/branch"), handler::createBranch)
+                .andRoute(RequestPredicates.PUT("/branch/{branchId}"), handler::updateBranch);
     }
 }

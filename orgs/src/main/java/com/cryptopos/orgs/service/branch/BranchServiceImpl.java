@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.cryptopos.orgs.dto.BranchCreateRequest;
 import com.cryptopos.orgs.dto.BranchCreateResult;
+import com.cryptopos.orgs.dto.BranchUpdateRequest;
+import com.cryptopos.orgs.dto.BranchUpdateResult;
 import com.cryptopos.orgs.entity.Branch;
 import com.cryptopos.orgs.repository.BranchRepository;
 import com.cryptopos.orgs.repository.EmployeeRepository;
@@ -52,6 +54,27 @@ public class BranchServiceImpl implements BranchService {
                             .flatMap(savedEntity -> employeeRepository.saveBranch(userId, savedEntity.id()))
                             .map(result -> result > 0 ? new BranchCreateResult(true, false)
                                     : new BranchCreateResult(false, false));
+                });
+    }
+
+    @Override
+    public Mono<BranchUpdateResult> updateBranch(Long branchId, BranchUpdateRequest updateRequest) {
+
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> employeeRepository.getBranches(Long.parseLong(userId)).collectList())
+                .flatMap(branchList -> {
+
+                    if (!branchList.contains(branchId)) {
+                        return Mono.just(new BranchUpdateResult(false, true));
+                    }
+
+                    return branchRepository
+                            .updateBranch(branchId, updateRequest.location(), updateRequest.isActive())
+                            .map(result -> result > 0 ? new BranchUpdateResult(true, false)
+                                    : new BranchUpdateResult(false, false));
+
                 });
     }
 

@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.cryptopos.orgs.dto.BranchCreateRequest;
+import com.cryptopos.orgs.dto.BranchUpdateRequest;
 import com.cryptopos.orgs.service.branch.BranchService;
 
 import reactor.core.publisher.Mono;
@@ -27,6 +28,27 @@ public class BranchHandler {
 
                     if (response.isSuccess()) {
                         return ServerResponse.status(HttpStatus.CREATED).build();
+                    }
+
+                    if (response.isAuthError()) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
+
+    public Mono<ServerResponse> updateBranch(ServerRequest request) {
+
+        Long branchId = Long.parseLong(request.pathVariable("branchId"));
+
+        return request
+                .bodyToMono(BranchUpdateRequest.class)
+                .flatMap(updateRequest -> branchService.updateBranch(branchId, updateRequest))
+                .flatMap(response -> {
+
+                    if (response.isSuccess()) {
+                        return ServerResponse.ok().build();
                     }
 
                     if (response.isAuthError()) {

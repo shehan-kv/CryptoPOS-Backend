@@ -91,8 +91,8 @@ public class ItemServiceImpl implements ItemService {
             Optional<String> pageNum,
             Optional<String> pageSize) {
 
-        Long pageNumLong = Long.parseLong(pageNum.orElse("1"));
-        Long pageSizeLong = Long.parseLong(pageSize.orElse("20"));
+        Long pageNumLong = Math.max(Long.parseLong(pageNum.orElse("1")), 1);
+        Long pageSizeLong = Math.max(Long.parseLong(pageSize.orElse("20")), 1);
         Long offset = (pageNumLong - 1) * pageSizeLong;
 
         return ReactiveSecurityContextHolder

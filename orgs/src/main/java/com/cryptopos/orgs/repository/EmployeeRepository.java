@@ -35,4 +35,15 @@ public class EmployeeRepository {
                 .map(row -> (Long) row.get("branch_id"));
     }
 
+    public Mono<Long> countBranches(Long userId) {
+
+        return databaseClient
+                .sql("SELECT COUNT(DISTINCT branch_id) FROM employee_branches WHERE employee_id = :userId")
+                .bind("userId", userId)
+                .fetch()
+                .one()
+                .map(row -> (Long) row.get("branch_id"));
+
+    }
+
 }

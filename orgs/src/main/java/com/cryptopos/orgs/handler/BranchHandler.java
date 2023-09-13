@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.cryptopos.orgs.dto.BranchCreateRequest;
 import com.cryptopos.orgs.dto.BranchUpdateRequest;
+import com.cryptopos.orgs.exception.NotPermittedException;
 import com.cryptopos.orgs.service.branch.BranchService;
 
 import reactor.core.publisher.Mono;
@@ -52,6 +53,24 @@ public class BranchHandler {
                     }
 
                     if (response.isAuthError()) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
+
+    public Mono<ServerResponse> getBranchesByOrg(ServerRequest request) {
+        Long orgId = Long.parseLong(request.pathVariable("orgId"));
+
+        return branchService
+                .getBranchesByOrg(
+                        orgId,
+                        request.queryParam("page"),
+                        request.queryParam("size"))
+                .flatMap(response -> ServerResponse.ok().bodyValue(response))
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
                         return ServerResponse.status(HttpStatus.FORBIDDEN).build();
                     }
 

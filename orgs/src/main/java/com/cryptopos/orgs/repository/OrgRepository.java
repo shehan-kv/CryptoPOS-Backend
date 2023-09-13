@@ -35,9 +35,9 @@ public interface OrgRepository extends ReactiveCrudRepository<Org, Long> {
     Flux<OrgDetailsResult> findOrgsDetailsByUser(Long userId, Long offset, Long pageSize);
 
     @Query("""
-            SELECT o.id, o.name,
-            FROM orgs o
-            WHERE o.id IN (
+            SELECT id, name
+            FROM orgs
+            WHERE id IN (
                 SELECT DISTINCT b.org_id
                 FROM branches b
                 INNER JOIN employee_branches eb ON eb.branch_id = b.id

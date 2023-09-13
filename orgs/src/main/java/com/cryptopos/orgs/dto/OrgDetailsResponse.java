@@ -9,6 +9,6 @@ public record OrgDetailsResponse(
         String country,
         boolean isActive,
         Long employees,
-        List<BranchResult> branches) {
+        List<BranchDetailsResponse> branches) {
 
 }

@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 import com.cryptopos.orgs.dto.BranchResponse;
-import com.cryptopos.orgs.dto.BranchResult;
+import com.cryptopos.orgs.dto.BranchDetailsResponse;
 import com.cryptopos.orgs.entity.Branch;
 
 import reactor.core.publisher.Flux;
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 
 public interface BranchRepository extends ReactiveCrudRepository<Branch, Long> {
 
-    Flux<BranchResult> findAllByOrgIdIn(Collection<Long> ids);
+    Flux<BranchDetailsResponse> findAllByOrgIdIn(Collection<Long> ids);
 
     @Modifying
     @Query("UPDATE branches SET is_active = false WHERE org_id = :orgId")

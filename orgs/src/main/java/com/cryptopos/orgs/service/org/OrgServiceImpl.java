@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.cryptopos.orgs.dto.BranchResult;
+import com.cryptopos.orgs.dto.BranchDetailsResponse;
 import com.cryptopos.orgs.dto.CreateOrgRequest;
 import com.cryptopos.orgs.dto.OrgDetailsResponse;
 import com.cryptopos.orgs.dto.OrgResponse;
@@ -127,7 +127,7 @@ public class OrgServiceImpl implements OrgService {
                                 orgResult.country(),
                                 orgResult.isActive(),
                                 orgResult.employees(),
-                                new ArrayList<BranchResult>()));
+                                new ArrayList<BranchDetailsResponse>()));
                     }
                     return orgMap;
                 })
@@ -136,7 +136,7 @@ public class OrgServiceImpl implements OrgService {
                     var orgMap = tuple.getT1();
                     var branchList = tuple.getT2();
 
-                    for (BranchResult branchResult : branchList) {
+                    for (BranchDetailsResponse branchResult : branchList) {
                         orgMap.get(branchResult.orgId()).branches().add(branchResult);
                     }
 

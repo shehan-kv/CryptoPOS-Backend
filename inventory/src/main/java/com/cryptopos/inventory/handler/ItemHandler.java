@@ -34,4 +34,22 @@ public class ItemHandler {
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 });
     }
+
+    public Mono<ServerResponse> getItemsByBranch(ServerRequest request) {
+        return itemService
+                .getItemsByBranch(
+                        Long.parseLong(request.pathVariable("branchId")),
+                        request.queryParam("page"),
+                        request.queryParam("size"))
+
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
+                .onErrorResume(error -> {
+                    System.out.println(error);
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
 }

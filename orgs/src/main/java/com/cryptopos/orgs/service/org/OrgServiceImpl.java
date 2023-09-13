@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 import com.cryptopos.orgs.dto.BranchResult;
 import com.cryptopos.orgs.dto.CreateOrgRequest;
 import com.cryptopos.orgs.dto.OrgDetailsResponse;
-import com.cryptopos.orgs.dto.OrgResult;
+import com.cryptopos.orgs.dto.OrgResponse;
+import com.cryptopos.orgs.dto.OrgDetailsResult;
 import com.cryptopos.orgs.dto.OrgUpdateRequest;
 import com.cryptopos.orgs.dto.OrgUpdateResult;
 import com.cryptopos.orgs.dto.Page;
@@ -101,9 +102,9 @@ public class OrgServiceImpl implements OrgService {
             Optional<String> pageNum,
             Optional<String> pageSize) {
 
-        int pageNumInt = Integer.parseInt(pageNum.orElse("1"));
-        int pageSizeInt = Integer.parseInt(pageSize.orElse("20"));
-        int offset = (pageNumInt - 1) * pageSizeInt;
+        Long pageNumLong = Long.parseLong(pageNum.orElse("1"));
+        Long pageSizeLong = Long.parseLong(pageSize.orElse("20"));
+        Long offset = (pageNumLong - 1) * pageSizeLong;
 
         return ReactiveSecurityContextHolder
                 .getContext()
@@ -112,13 +113,13 @@ public class OrgServiceImpl implements OrgService {
                     Long userIdLong = Long.parseLong(userId);
 
                     return orgRepository
-                            .findOrgsByUser(userIdLong, offset, pageSizeInt)
+                            .findOrgsDetailsByUser(userIdLong, offset, pageSizeLong)
                             .collectList();
                 })
                 .map(orgList -> {
                     var orgMap = new HashMap<Long, OrgDetailsResponse>();
 
-                    for (OrgResult orgResult : orgList) {
+                    for (OrgDetailsResult orgResult : orgList) {
                         orgMap.put(orgResult.id(), new OrgDetailsResponse(
                                 orgResult.id(),
                                 orgResult.name(),
@@ -150,8 +151,8 @@ public class OrgServiceImpl implements OrgService {
                         }))
                 .map(tuple -> {
                     var orgList = tuple.getT1();
-                    var pageCount = Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeInt), 1);
-                    return new Page<OrgDetailsResponse>(pageNumInt, pageSizeInt, pageCount, orgList);
+                    Long pageCount = (long) Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeLong), 1);
+                    return new Page<OrgDetailsResponse>(pageNumLong, pageSizeLong, pageCount, orgList);
                 });
     }
 
@@ -183,6 +184,30 @@ public class OrgServiceImpl implements OrgService {
                                         : new OrgUpdateResult(false, false));
 
                     }
+                });
+    }
+
+    @Override
+    public Mono<Page<OrgResponse>> getOrgsByUser(Optional<String> pageNum, Optional<String> pageSize) {
+        Long pageNumLong = Long.parseLong(pageNum.orElse("1"));
+        Long pageSizeLong = Long.parseLong(pageSize.orElse("20"));
+        Long offset = (pageNumLong - 1) * pageSizeLong;
+
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+                    Long userIdLong = Long.parseLong(userId);
+
+                    return orgRepository
+                            .findOrgsByUser(userIdLong, offset, pageSizeLong)
+                            .collectList()
+                            .zipWith(orgRepository.countOrgsByUser(userIdLong));
+                })
+                .map(tuple -> {
+                    var orgList = tuple.getT1();
+                    Long pageCount = (long) Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeLong), 1);
+                    return new Page<OrgResponse>(pageNumLong, pageSizeLong, pageCount, orgList);
                 });
     }
 

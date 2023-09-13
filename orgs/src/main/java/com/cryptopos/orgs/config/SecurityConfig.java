@@ -28,6 +28,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/")
                         .authenticated()
 
+                        .pathMatchers(HttpMethod.GET, "/detailed")
+                        .authenticated()
+
                         .pathMatchers(HttpMethod.PUT, "/{orgId}")
                         .hasRole("GLOBAL_ADMINISTRATOR")
 

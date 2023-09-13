@@ -5,7 +5,8 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
-import com.cryptopos.orgs.dto.OrgResult;
+import com.cryptopos.orgs.dto.OrgDetailsResult;
+import com.cryptopos.orgs.dto.OrgResponse;
 import com.cryptopos.orgs.entity.Org;
 
 import reactor.core.publisher.Flux;
@@ -31,7 +32,21 @@ public interface OrgRepository extends ReactiveCrudRepository<Org, Long> {
             )
             GROUP BY o.id, o.name, o.is_active, co.name, cu.code;
                 """)
-    Flux<OrgResult> findOrgsByUser(Long userId, int offset, int pageSize);
+    Flux<OrgDetailsResult> findOrgsDetailsByUser(Long userId, Long offset, Long pageSize);
+
+    @Query("""
+            SELECT o.id, o.name,
+            FROM orgs o
+            WHERE o.id IN (
+                SELECT DISTINCT b.org_id
+                FROM branches b
+                INNER JOIN employee_branches eb ON eb.branch_id = b.id
+                WHERE eb.employee_id = :userId
+                OFFSET :offset
+                LIMIT :pageSize
+            )
+                """)
+    Flux<OrgResponse> findOrgsByUser(Long userId, Long offset, Long pageSize);
 
     @Query("""
             SELECT COUNT(DISTINCT b.org_id)

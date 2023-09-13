@@ -35,6 +35,13 @@ public class OrgHandler {
 
     }
 
+    public Mono<ServerResponse> getOrgsByUser(ServerRequest request) {
+        return orgService
+                .getOrgsByUser(request.queryParam("page"), request.queryParam("size"))
+                .flatMap(result -> ServerResponse.ok().bodyValue(result));
+
+    }
+
     public Mono<ServerResponse> updateOrg(ServerRequest request) {
         return request
                 .bodyToMono(OrgUpdateRequest.class)

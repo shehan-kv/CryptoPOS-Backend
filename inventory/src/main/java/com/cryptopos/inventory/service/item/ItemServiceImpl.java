@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.cryptopos.inventory.dto.ItemCreateRequest;
 import com.cryptopos.inventory.dto.ItemResult;
+import com.cryptopos.inventory.dto.ItemUpdateRequest;
 import com.cryptopos.inventory.dto.Page;
 import com.cryptopos.inventory.entity.DiscountType;
 import com.cryptopos.inventory.entity.Item;
@@ -116,6 +117,45 @@ public class ItemServiceImpl implements ItemService {
                     Long pageCount = (long) Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeLong), 1);
 
                     return new Page<ItemResult>(pageNumLong, pageSizeLong, pageCount, itemResults);
+
+                });
+    }
+
+    @Override
+    public Mono<Boolean> updateItem(Long itemId, ItemUpdateRequest updateRequest) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+                    return amqpService.getUserBranches(Long.parseLong(userId));
+                })
+                .zipWith(itemRepository.findById(itemId))
+                .flatMap(tuple -> {
+                    List<Long> brandList = tuple.getT1();
+                    Item existingItem = tuple.getT2();
+
+                    if (!brandList.contains(existingItem.branchId())) {
+                        return Mono.error(new NotPermittedException());
+                    }
+
+                    return taxRepository.findByType(updateRequest.taxType().toUpperCase());
+                })
+                .zipWith(discountRepository.findByType(updateRequest.discountType().toUpperCase()))
+                .flatMap(tuple -> {
+
+                    TaxType taxType = tuple.getT1();
+                    DiscountType discountType = tuple.getT2();
+
+                    return itemRepository.updateItem(
+                            itemId,
+                            updateRequest.lookupCode(),
+                            updateRequest.description(),
+                            updateRequest.price(),
+                            updateRequest.tax(),
+                            taxType.id(),
+                            updateRequest.discount(),
+                            discountType.id())
+                            .map(result -> true);
 
                 });
     }

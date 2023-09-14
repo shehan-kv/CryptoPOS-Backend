@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.cryptopos.orgs.dto.BranchCreateRequest;
 import com.cryptopos.orgs.dto.BranchCreateResult;
+import com.cryptopos.orgs.dto.BranchCurrencyResponse;
 import com.cryptopos.orgs.dto.BranchResponse;
 import com.cryptopos.orgs.dto.BranchUpdateRequest;
 import com.cryptopos.orgs.dto.BranchUpdateResult;
@@ -21,4 +22,6 @@ public interface BranchService {
     Mono<BranchUpdateResult> updateBranch(Long branchId, BranchUpdateRequest updateRequest);
 
     Mono<Page<BranchResponse>> getBranchesByOrg(Long orgId, Optional<String> pageNum, Optional<String> pageSize);
+
+    Mono<BranchCurrencyResponse> getBranchCurrency(Long branchId);
 }

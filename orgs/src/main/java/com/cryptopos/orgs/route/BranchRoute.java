@@ -17,6 +17,7 @@ public class BranchRoute {
         return RouterFunctions
                 .route(RequestPredicates.POST("/branch"), handler::createBranch)
                 .andRoute(RequestPredicates.GET("/branch/by-org/{orgId}"), handler::getBranchesByOrg)
+                .andRoute(RequestPredicates.GET("/branch/currency/{branchId}"), handler::getBranchCurrency)
                 .andRoute(RequestPredicates.PUT("/branch/{branchId}"), handler::updateBranch);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.cryptopos.orgs.dto.BranchCreateRequest;
 import com.cryptopos.orgs.dto.BranchCreateResult;
+import com.cryptopos.orgs.dto.BranchCurrencyResponse;
 import com.cryptopos.orgs.dto.BranchResponse;
 import com.cryptopos.orgs.dto.BranchUpdateRequest;
 import com.cryptopos.orgs.dto.BranchUpdateResult;
@@ -123,6 +124,22 @@ public class BranchServiceImpl implements BranchService {
                     Long pageCount = (long) Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeLong), 1);
 
                     return new Page<BranchResponse>(pageNumLong, pageSizeLong, pageCount, branchList);
+                });
+    }
+
+    @Override
+    public Mono<BranchCurrencyResponse> getBranchCurrency(Long branchId) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> employeeRepository.getBranches(Long.parseLong(userId)).collectList())
+                .flatMap(branchList -> {
+
+                    if (!branchList.contains(branchId)) {
+                        return Mono.error(new NotPermittedException());
+                    }
+
+                    return branchRepository.findCurrencyById(branchId);
                 });
     }
 

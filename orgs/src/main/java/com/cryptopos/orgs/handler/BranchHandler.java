@@ -77,4 +77,18 @@ public class BranchHandler {
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 });
     }
+
+    public Mono<ServerResponse> getBranchCurrency(ServerRequest request) {
+
+        return branchService
+                .getBranchCurrency(Long.parseLong(request.pathVariable("branchId")))
+                .flatMap(response -> ServerResponse.ok().bodyValue(response))
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
 }

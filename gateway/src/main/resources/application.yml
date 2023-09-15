@@ -1,0 +1,37 @@
+server:
+  port: ${PORT}
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-route
+          uri: ${USER_URI}
+          predicates:
+            - Path=/user/**
+          filters:
+            - RewritePath=/user/?(?<segment>.*), /$\{segment}
+        - id: org-route
+          uri: ${ORG_URI}
+          predicates:
+            - Path=/org/**
+          filters:
+            - RewritePath=/org/?(?<segment>.*), /$\{segment}
+        - id: inventory-route
+          uri: ${INVENTORY_URI}
+          predicates:
+            - Path=/inventory/**
+          filters:
+            - RewritePath=/inventory/?(?<segment>.*), /$\{segment}
+
+      globalcors:
+        cors-configurations:
+          "[/**]":
+            allowedOrigins: ${CORS_ORIGIN}
+            allowedHeaders: ${CORS_HEADERS}
+            allowCredentials: true
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE

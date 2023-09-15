@@ -16,6 +16,8 @@ public class ItemRoute {
     public RouterFunction<ServerResponse> branchRoutes(ItemHandler handler) {
         return RouterFunctions
                 .route(RequestPredicates.POST("/{branchId}"), handler::createItem)
+                .andRoute(RequestPredicates.PUT("/update/{itemId}"), handler::updateItem)
+                .andRoute(RequestPredicates.PUT("/update-stock/{itemId}"), handler::updateItemStock)
                 .andRoute(RequestPredicates.GET("/{branchId}"), handler::getItemsByBranch);
 
     }

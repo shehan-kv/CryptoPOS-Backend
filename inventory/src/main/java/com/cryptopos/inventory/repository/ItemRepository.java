@@ -51,4 +51,22 @@ public interface ItemRepository extends ReactiveCrudRepository<Item, Long> {
             @Param("taxType") Long taxType,
             @Param("discount") BigDecimal discount,
             @Param("discountType") Long discountType);
+
+    @Modifying
+    @Query("""
+            UPDATE items SET in_stock = in_stock + :stock WHERE id = :itemId
+            """)
+    Mono<Long> incrementStock(@Param("itemId") Long itemId, @Param("stock") Long stock);
+
+    @Modifying
+    @Query("""
+            UPDATE items SET in_stock = CASE WHEN in_stock >= :stock THEN in_stock - :stock ELSE 0 END WHERE id = :itemId
+                """)
+    Mono<Long> decreaseStock(@Param("itemId") Long itemId, @Param("stock") Long stock);
+
+    @Modifying
+    @Query("""
+            UPDATE items SET in_stock = 0 WHERE id = :itemId
+            """)
+    Mono<Long> clearStock(Long itemId);
 }

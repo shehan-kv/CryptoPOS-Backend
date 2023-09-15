@@ -6,6 +6,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.cryptopos.inventory.dto.ItemCreateRequest;
+import com.cryptopos.inventory.dto.ItemStockUpdateRequest;
 import com.cryptopos.inventory.dto.ItemUpdateRequest;
 import com.cryptopos.inventory.exceptions.NotPermittedException;
 import com.cryptopos.inventory.service.item.ItemService;
@@ -57,6 +58,22 @@ public class ItemHandler {
         return request
                 .bodyToMono(ItemUpdateRequest.class)
                 .flatMap(updateRequest -> itemService.updateItem(
+                        Long.parseLong(request.pathVariable("itemId")),
+                        updateRequest))
+                .flatMap(result -> ServerResponse.ok().build())
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
+
+    public Mono<ServerResponse> updateItemStock(ServerRequest request) {
+        return request
+                .bodyToMono(ItemStockUpdateRequest.class)
+                .flatMap(updateRequest -> itemService.updateItemStock(
                         Long.parseLong(request.pathVariable("itemId")),
                         updateRequest))
                 .flatMap(result -> ServerResponse.ok().build())

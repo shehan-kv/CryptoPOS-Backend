@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.cryptopos.inventory.dto.ItemCreateRequest;
 import com.cryptopos.inventory.dto.ItemResult;
+import com.cryptopos.inventory.dto.ItemStockUpdateRequest;
+import com.cryptopos.inventory.dto.ItemStockUpdateType;
 import com.cryptopos.inventory.dto.ItemUpdateRequest;
 import com.cryptopos.inventory.dto.Page;
 import com.cryptopos.inventory.entity.DiscountType;
@@ -156,6 +158,36 @@ public class ItemServiceImpl implements ItemService {
                             updateRequest.discount(),
                             discountType.id())
                             .map(result -> true);
+
+                });
+    }
+
+    @Override
+    public Mono<Boolean> updateItemStock(Long itemId, ItemStockUpdateRequest updateRequest) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+                    return amqpService.getUserBranches(Long.parseLong(userId));
+                })
+                .zipWith(itemRepository.findById(itemId))
+                .flatMap(tuple -> {
+                    List<Long> brandList = tuple.getT1();
+                    Item existingItem = tuple.getT2();
+
+                    if (!brandList.contains(existingItem.branchId())) {
+                        return Mono.error(new NotPermittedException());
+                    }
+
+                    if (updateRequest.type() == ItemStockUpdateType.INCREASE) {
+                        return itemRepository.incrementStock(itemId, updateRequest.inStock()).map(result -> true);
+                    }
+
+                    if (updateRequest.type() == ItemStockUpdateType.DECREASE) {
+                        return itemRepository.decreaseStock(itemId, updateRequest.inStock()).map(result -> true);
+                    }
+
+                    return itemRepository.clearStock(itemId).map(result -> true);
 
                 });
     }

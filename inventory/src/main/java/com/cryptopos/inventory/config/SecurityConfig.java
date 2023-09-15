@@ -28,6 +28,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.PUT, "/update/{itemId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "INVENTORY_MANAGER", "BRANCH_MANAGER")
 
+                        .pathMatchers(HttpMethod.PUT, "/update-stock/{itemId}")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "INVENTORY_MANAGER", "BRANCH_MANAGER")
+
                         .pathMatchers(HttpMethod.GET, "/{branchId}")
                         .authenticated())
                 .formLogin(customizer -> customizer.disable())

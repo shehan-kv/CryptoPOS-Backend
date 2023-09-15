@@ -1,6 +1,6 @@
 package com.cryptopos.orgs.dto;
 
-public record BranchResult(
+public record BranchDetailsResponse(
         Long id,
         Long orgId,
         String location,

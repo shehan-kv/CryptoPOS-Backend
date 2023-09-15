@@ -28,11 +28,20 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/")
                         .authenticated()
 
+                        .pathMatchers(HttpMethod.GET, "/detailed")
+                        .authenticated()
+
                         .pathMatchers(HttpMethod.PUT, "/{orgId}")
                         .hasRole("GLOBAL_ADMINISTRATOR")
 
                         .pathMatchers(HttpMethod.POST, "/branch")
                         .hasRole("GLOBAL_ADMINISTRATOR")
+
+                        .pathMatchers(HttpMethod.GET, "/branch/by-org/{orgId}")
+                        .authenticated()
+
+                        .pathMatchers(HttpMethod.GET, "/branch/currency/{orgId}")
+                        .authenticated()
 
                         .pathMatchers(HttpMethod.PUT, "/branch/{branchId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")

@@ -1,6 +1,6 @@
 package com.cryptopos.orgs.dto;
 
-public record OrgResult(
+public record OrgDetailsResult(
         Long id,
         String name,
         String currency,

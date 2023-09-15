@@ -15,7 +15,8 @@ public class ItemRoute {
     @Bean
     public RouterFunction<ServerResponse> branchRoutes(ItemHandler handler) {
         return RouterFunctions
-                .route(RequestPredicates.POST("/{branchId}"), handler::createItem);
+                .route(RequestPredicates.POST("/{branchId}"), handler::createItem)
+                .andRoute(RequestPredicates.GET("/{branchId}"), handler::getItemsByBranch);
 
     }
 }

@@ -1,13 +1,20 @@
 package com.cryptopos.orgs.service.branch;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.cryptopos.orgs.dto.BranchCreateRequest;
 import com.cryptopos.orgs.dto.BranchCreateResult;
+import com.cryptopos.orgs.dto.BranchCurrencyResponse;
+import com.cryptopos.orgs.dto.BranchResponse;
 import com.cryptopos.orgs.dto.BranchUpdateRequest;
 import com.cryptopos.orgs.dto.BranchUpdateResult;
+import com.cryptopos.orgs.dto.Page;
 import com.cryptopos.orgs.entity.Branch;
+import com.cryptopos.orgs.exception.NotPermittedException;
 import com.cryptopos.orgs.repository.BranchRepository;
 import com.cryptopos.orgs.repository.EmployeeRepository;
 import com.cryptopos.orgs.repository.OrgRepository;
@@ -75,6 +82,64 @@ public class BranchServiceImpl implements BranchService {
                             .map(result -> result > 0 ? new BranchUpdateResult(true, false)
                                     : new BranchUpdateResult(false, false));
 
+                });
+    }
+
+    @Override
+    public Mono<Page<BranchResponse>> getBranchesByOrg(
+            Long orgId,
+            Optional<String> pageNum,
+            Optional<String> pageSize) {
+
+        Long pageNumLong = Math.max(Long.parseLong(pageNum.orElse("1")), 1);
+        Long pageSizeLong = Math.max(Long.parseLong(pageSize.orElse("20")), 1);
+        Long offset = (pageNumLong - 1) * pageSizeLong;
+
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+
+                    Long userIdLong = Long.parseLong(userId);
+
+                    return orgRepository.findOrgIdsByUser(userIdLong)
+                            .collectList()
+                            .map(orgIds -> {
+                                if (!orgIds.contains(orgId)) {
+                                    throw new NotPermittedException();
+                                }
+
+                                return userIdLong;
+                            });
+                })
+                .flatMap(userId -> {
+                    return branchRepository
+                            .findByOrgIdAndUserId(orgId, userId, offset, pageSizeLong)
+                            .collectList()
+                            .zipWith(branchRepository.countBranchesByOrgIdAndUserId(orgId, userId));
+                })
+                .map(tuple -> {
+
+                    List<BranchResponse> branchList = tuple.getT1();
+                    Long pageCount = (long) Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeLong), 1);
+
+                    return new Page<BranchResponse>(pageNumLong, pageSizeLong, pageCount, branchList);
+                });
+    }
+
+    @Override
+    public Mono<BranchCurrencyResponse> getBranchCurrency(Long branchId) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> employeeRepository.getBranches(Long.parseLong(userId)).collectList())
+                .flatMap(branchList -> {
+
+                    if (!branchList.contains(branchId)) {
+                        return Mono.error(new NotPermittedException());
+                    }
+
+                    return branchRepository.findCurrencyById(branchId);
                 });
     }
 

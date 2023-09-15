@@ -1,4 +1,4 @@
-package com.cryptopos.orgs.dto;
+package com.cryptopos.inventory.dto;
 
 import java.util.Collection;
 

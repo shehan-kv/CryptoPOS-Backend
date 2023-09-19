@@ -191,4 +191,24 @@ public class ItemServiceImpl implements ItemService {
 
                 });
     }
+
+    @Override
+    public Mono<List<ItemResult>> getItemsByBranchAndLookupCode(Long branchId, String lookupCode) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+                    return amqpService.getUserBranches(Long.parseLong(userId));
+                })
+                .map(branchList -> {
+                    if (!branchList.contains(branchId)) {
+                        throw new NotPermittedException();
+                    }
+
+                    return branchList;
+                })
+                .flatMap(branchList -> itemRepository
+                        .findItemByBranchAndLookupCode(branchId, lookupCode)
+                        .collectList());
+    }
 }

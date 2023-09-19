@@ -54,6 +54,22 @@ public class ItemHandler {
                 });
     }
 
+    public Mono<ServerResponse> getItemsByBranchAndLookupCode(ServerRequest request) {
+        return itemService
+                .getItemsByBranchAndLookupCode(
+                        Long.parseLong(request.pathVariable("branchId")),
+                        request.pathVariable("lookupCode"))
+
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
+
     public Mono<ServerResponse> updateItem(ServerRequest request) {
         return request
                 .bodyToMono(ItemUpdateRequest.class)

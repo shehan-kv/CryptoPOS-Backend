@@ -10,4 +10,6 @@ import reactor.core.publisher.Mono;
 public interface AmqpService {
 
     Mono<List<Long>> getUserBranches(Long userId);
+
+    Mono<Long> getBranchOrgId(Long branchId);
 }

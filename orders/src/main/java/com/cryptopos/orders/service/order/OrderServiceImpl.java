@@ -43,12 +43,15 @@ public class OrderServiceImpl implements OrderService {
                                 return userId;
                             });
                 })
-                .flatMap(userId -> {
+                .zipWith(amqpService.getBranchOrgId(branchId))
+                .flatMap(tuple -> {
+                    Long userId = Long.parseLong(tuple.getT1());
+                    Long orgId = tuple.getT2();
 
                     Order newOrder = new Order(
                             null,
-                            Long.parseLong(userId),
-                            branchId, // ORG ID FROM AMQP
+                            userId,
+                            orgId,
                             branchId,
                             createRequest.items(),
                             LocalDateTime.now(),

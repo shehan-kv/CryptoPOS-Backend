@@ -9,5 +9,5 @@ import reactor.core.publisher.Mono;
 @Service
 public interface OrderService {
 
-    Mono<Boolean> createOrder(OrderCreateRequest createRequest);
+    Mono<Boolean> createOrder(Long branchId, OrderCreateRequest createRequest);
 }

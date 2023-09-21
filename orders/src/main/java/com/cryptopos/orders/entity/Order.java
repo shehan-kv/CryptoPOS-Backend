@@ -13,6 +13,7 @@ import com.cryptopos.orders.dto.Item;
 public record Order(
         @Id String id,
         Long userId,
+        Long orgId,
         Long branchId,
         List<Item> items,
         LocalDateTime createdDate,

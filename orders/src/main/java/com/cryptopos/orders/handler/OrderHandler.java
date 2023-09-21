@@ -23,7 +23,8 @@ public class OrderHandler {
 
     public Mono<ServerResponse> createOrder(ServerRequest request) {
         return request.bodyToMono(OrderCreateRequest.class)
-                .flatMap(createRequest -> orderService.createOrder(createRequest))
+                .flatMap(createRequest -> orderService.createOrder(Long.parseLong(request.pathVariable("branchId")),
+                        createRequest))
                 .flatMap(result -> ServerResponse.ok().build())
                 .onErrorResume(error -> {
                     if (error instanceof NotPermittedException) {

@@ -15,7 +15,7 @@ public class OrderRoute {
     @Bean
     public RouterFunction<ServerResponse> branchRoutes(OrderHandler handler) {
         return RouterFunctions
-                .route(RequestPredicates.POST("/"), handler::createOrder);
+                .route(RequestPredicates.POST("/{branchId}"), handler::createOrder);
 
     }
 }

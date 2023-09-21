@@ -26,14 +26,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Mono<Boolean> createOrder(OrderCreateRequest createRequest) {
+    public Mono<Boolean> createOrder(Long branchId, OrderCreateRequest createRequest) {
         return ReactiveSecurityContextHolder
                 .getContext()
                 .map(context -> context.getAuthentication().getName())
                 .flatMap(userId -> {
                     return amqpService.getUserBranches(Long.parseLong(userId))
                             .map(branchList -> {
-                                if (!branchList.contains(createRequest.branchId())) {
+                                if (!branchList.contains(branchId)) {
                                     throw new NotPermittedException();
                                 }
 
@@ -48,7 +48,8 @@ public class OrderServiceImpl implements OrderService {
                     Order newOrder = new Order(
                             null,
                             Long.parseLong(userId),
-                            createRequest.branchId(),
+                            branchId, // ORG ID FROM AMQP
+                            branchId,
                             createRequest.items(),
                             LocalDateTime.now(),
                             createRequest.subTotal(),

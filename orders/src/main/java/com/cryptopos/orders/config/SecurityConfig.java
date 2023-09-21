@@ -22,7 +22,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize
-                        .pathMatchers(HttpMethod.POST, "/")
+                        .pathMatchers(HttpMethod.POST, "/{branchId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER"))
                 .formLogin(customizer -> customizer.disable())
                 .httpBasic(customizer -> customizer.disable())

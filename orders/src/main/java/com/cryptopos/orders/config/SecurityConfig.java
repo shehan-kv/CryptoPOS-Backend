@@ -23,6 +23,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize
                         .pathMatchers(HttpMethod.POST, "/{branchId}")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER")
+
+                        .pathMatchers(HttpMethod.GET, "/user-last-orders/{branchId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER"))
                 .formLogin(customizer -> customizer.disable())
                 .httpBasic(customizer -> customizer.disable())

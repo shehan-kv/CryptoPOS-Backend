@@ -1,11 +1,13 @@
 package com.cryptopos.orders.service.order;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.cryptopos.orders.dto.OrderCreateRequest;
+import com.cryptopos.orders.dto.OrderResponse;
 import com.cryptopos.orders.entity.Order;
 import com.cryptopos.orders.exceptions.NoItemsException;
 import com.cryptopos.orders.exceptions.NotPermittedException;
@@ -61,6 +63,28 @@ public class OrderServiceImpl implements OrderService {
                             createRequest.totalDiscount());
 
                     return orderRepository.save(newOrder).map(result -> true);
+                });
+    }
+
+    @Override
+    public Mono<List<OrderResponse>> getLastOrdersByUser(Long branchId) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+                    Long userIdLong = Long.parseLong(userId);
+
+                    return amqpService.getUserBranches(userIdLong)
+                            .map(branchList -> {
+                                if (!branchList.contains(branchId)) {
+                                    throw new NotPermittedException();
+                                }
+
+                                return branchList;
+                            })
+                            .flatMap(branchList -> orderRepository.findLastOrdersByUser(branchId,
+                                    userIdLong).collectList());
+
                 });
     }
 

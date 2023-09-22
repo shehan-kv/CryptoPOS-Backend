@@ -38,4 +38,19 @@ public class OrderHandler {
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 });
     }
+
+    public Mono<ServerResponse> getLastOrdersByUser(ServerRequest request) {
+
+        return orderService
+                .getLastOrdersByUser(Long.parseLong(request.pathVariable("branchId")))
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+
+    }
 }

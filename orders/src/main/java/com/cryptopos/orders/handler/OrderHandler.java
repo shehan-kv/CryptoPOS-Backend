@@ -53,4 +53,20 @@ public class OrderHandler {
                 });
 
     }
+
+    public Mono<ServerResponse> getOrdersByBranchId(ServerRequest request) {
+
+        return orderService
+                .getOrdersByBranchId(Long.parseLong(request.pathVariable("branchId")), request.queryParam("page"),
+                        request.queryParam("size"))
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+
+    }
 }

@@ -16,6 +16,7 @@ public class OrderRoute {
     public RouterFunction<ServerResponse> branchRoutes(OrderHandler handler) {
         return RouterFunctions
                 .route(RequestPredicates.POST("/{branchId}"), handler::createOrder)
+                .andRoute(RequestPredicates.GET("/{branchId}"), handler::getOrdersByBranchId)
                 .andRoute(RequestPredicates.GET("/user-last-orders/{branchId}"), handler::getLastOrdersByUser);
 
     }

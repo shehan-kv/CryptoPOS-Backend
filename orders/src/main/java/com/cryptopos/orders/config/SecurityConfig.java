@@ -25,6 +25,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/{branchId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER")
 
+                        .pathMatchers(HttpMethod.GET, "/{branchId}")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER")
+
                         .pathMatchers(HttpMethod.GET, "/user-last-orders/{branchId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER"))
                 .formLogin(customizer -> customizer.disable())

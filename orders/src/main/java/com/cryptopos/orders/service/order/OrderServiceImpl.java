@@ -62,7 +62,8 @@ public class OrderServiceImpl implements OrderService {
                             createRequest.subTotal(),
                             createRequest.itemCount(),
                             createRequest.totalTax(),
-                            createRequest.totalDiscount());
+                            createRequest.totalDiscount(),
+                            createRequest.paymentMethod());
 
                     return orderRepository.save(newOrder).map(result -> true);
                 });

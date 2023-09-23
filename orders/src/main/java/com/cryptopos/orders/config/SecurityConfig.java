@@ -1,4 +1,4 @@
-package com.cryptopos.inventory.config;
+package com.cryptopos.orders.config;
 
 import java.util.Collections;
 
@@ -23,19 +23,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize
                         .pathMatchers(HttpMethod.POST, "/{branchId}")
-                        .hasRole("GLOBAL_ADMINISTRATOR")
-
-                        .pathMatchers(HttpMethod.PUT, "/update/{itemId}")
-                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "INVENTORY_MANAGER", "BRANCH_MANAGER")
-
-                        .pathMatchers(HttpMethod.PUT, "/update-stock/{itemId}")
-                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "INVENTORY_MANAGER", "BRANCH_MANAGER")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER")
 
                         .pathMatchers(HttpMethod.GET, "/{branchId}")
-                        .authenticated()
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER")
 
-                        .pathMatchers(HttpMethod.GET, "/{branchId}/{lookupCode}")
-                        .authenticated())
+                        .pathMatchers(HttpMethod.GET, "/user-last-orders/{branchId}")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER"))
                 .formLogin(customizer -> customizer.disable())
                 .httpBasic(customizer -> customizer.disable())
                 .build();

@@ -23,6 +23,12 @@ spring:
             - Path=/inventory/**
           filters:
             - RewritePath=/inventory/?(?<segment>.*), /$\{segment}
+        - id: orders-route
+          uri: ${ORDERS_URI}
+          predicates:
+            - Path=/orders/**
+          filters:
+            - RewritePath=/orders/?(?<segment>.*), /$\{segment}
 
       globalcors:
         cors-configurations:

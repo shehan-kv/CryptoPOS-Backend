@@ -6,6 +6,8 @@ import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
 import org.springframework.amqp.rabbit.RabbitConverterFuture;
 import org.springframework.stereotype.Component;
 
+import com.cryptopos.user.dto.EmployeeBranchesAddRequest;
+
 import reactor.core.publisher.Mono;
 
 @Component
@@ -31,6 +33,14 @@ public class AmqpServiceImpl implements AmqpService {
                     }
                 });
 
+    }
+
+    @Override
+    public Mono<Boolean> setUserBranches(EmployeeBranchesAddRequest request) {
+        return Mono.fromCallable(() -> {
+            rabbitTemplate.getRabbitTemplate().convertAndSend("pos.exchange", "branches.add", request);
+            return true;
+        });
     }
 
 }

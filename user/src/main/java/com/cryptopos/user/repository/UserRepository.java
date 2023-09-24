@@ -20,4 +20,6 @@ public interface UserRepository extends ReactiveCrudRepository<User, Long> {
             """)
     Mono<UserDetailsAuthResult> findAuthDetailsByEmail(String email);
 
+    Mono<Long> updateEmployee(Long userId, String firstName, String lastName, Long role);
+
 }

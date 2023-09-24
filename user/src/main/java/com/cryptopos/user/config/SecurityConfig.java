@@ -41,7 +41,11 @@ public class SecurityConfig {
                 .authorizeExchange(authorize -> authorize
                         .pathMatchers("/signup")
                         .permitAll()
+
                         .pathMatchers(HttpMethod.POST, "/employee")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
+
+                        .pathMatchers(HttpMethod.POST, "/employee/{employeeId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
 
                 )

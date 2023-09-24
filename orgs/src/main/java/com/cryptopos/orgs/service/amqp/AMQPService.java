@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import com.cryptopos.orgs.dto.EmployeeBranchesAddRequest;
 import com.cryptopos.orgs.repository.BranchRepository;
 import com.cryptopos.orgs.repository.EmployeeRepository;
 
@@ -29,5 +30,14 @@ public class AMQPService {
     @RabbitListener(queues = "branch.org")
     public Mono<Long> getBranchOrgId(Long data) {
         return branchRepository.findOrgIdByBranchId(data);
+    }
+
+    @RabbitListener(queues = "branches.add")
+    public void addUserBranches(EmployeeBranchesAddRequest data) {
+
+        for (Long branchId : data.branches()) {
+            employeeRepository.saveBranch(data.userId(), branchId);
+        }
+
     }
 }

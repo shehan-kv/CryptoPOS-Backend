@@ -6,10 +6,12 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.cryptopos.user.dto.EmployeeCreateRequest;
+import com.cryptopos.user.dto.EmployeeUpdateRequest;
 import com.cryptopos.user.dto.SignUpRequest;
 import com.cryptopos.user.exception.NotPermittedException;
 import com.cryptopos.user.exception.UserExistsException;
 import com.cryptopos.user.exception.UserNoBranchException;
+import com.cryptopos.user.exception.UserNotFoundException;
 import com.cryptopos.user.service.user.UserService;
 
 import reactor.core.publisher.Mono;
@@ -43,6 +45,25 @@ public class UserHandler {
 
                     if (error instanceof UserExistsException) {
                         return ServerResponse.badRequest().build();
+                    }
+
+                    if (error instanceof UserNoBranchException) {
+                        return ServerResponse.badRequest().build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
+
+    public Mono<ServerResponse> updateEmployee(ServerRequest request) {
+        return request
+                .bodyToMono(EmployeeUpdateRequest.class)
+                .flatMap(updateRequest -> userService.updateEmployee(Long.parseLong(request.pathVariable("employeeId")),
+                        updateRequest))
+                .flatMap(result -> ServerResponse.ok().build())
+                .onErrorResume(error -> {
+                    if (error instanceof UserNotFoundException) {
+                        return ServerResponse.notFound().build();
                     }
 
                     if (error instanceof UserNoBranchException) {

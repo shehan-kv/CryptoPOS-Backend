@@ -39,9 +39,10 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize
-                        .pathMatchers(
-                                "/signup")
+                        .pathMatchers("/signup")
                         .permitAll()
+                        .pathMatchers(HttpMethod.POST, "/employee")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
 
                 )
                 .formLogin(customizer -> customizer

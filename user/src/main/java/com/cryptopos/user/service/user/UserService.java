@@ -3,6 +3,7 @@ package com.cryptopos.user.service.user;
 import org.springframework.stereotype.Service;
 
 import com.cryptopos.user.dto.EmployeeCreateRequest;
+import com.cryptopos.user.dto.EmployeeResponse;
 import com.cryptopos.user.dto.EmployeeUpdateRequest;
 import com.cryptopos.user.dto.SignUpRequest;
 
@@ -16,4 +17,6 @@ public interface UserService {
     Mono<Boolean> createEmployee(EmployeeCreateRequest createRequest);
 
     Mono<Boolean> updateEmployee(Long employeeId, EmployeeUpdateRequest updateRequest);
+
+    Mono<EmployeeResponse> getEmployee(Long employeeId);
 }

@@ -73,4 +73,17 @@ public class UserHandler {
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 });
     }
+
+    public Mono<ServerResponse> getEmployee(ServerRequest request) {
+        return userService
+                .getEmployee(Long.parseLong(request.pathVariable("employeeId")))
+                .flatMap(result -> ServerResponse.ok().build())
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
 }

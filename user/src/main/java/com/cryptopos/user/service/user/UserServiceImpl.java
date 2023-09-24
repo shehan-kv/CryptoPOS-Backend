@@ -7,6 +7,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.cryptopos.user.dto.EmployeeBranchesAddRequest;
 import com.cryptopos.user.dto.EmployeeCreateRequest;
+import com.cryptopos.user.dto.EmployeeResponse;
 import com.cryptopos.user.dto.EmployeeUpdateRequest;
 import com.cryptopos.user.dto.SignUpRequest;
 import com.cryptopos.user.entity.Role;
@@ -139,11 +140,44 @@ public class UserServiceImpl implements UserService {
                     return userRepository
                             .updateEmployee(employeeId,
                                     updateRequest.firstName(),
-                                    updateRequest.lastName(), role.id())
+                                    updateRequest.lastName(),
+                                    updateRequest.isActive(),
+                                    role.id())
                             .flatMap(result -> amqpService.setUserBranches(
                                     new EmployeeBranchesAddRequest(employeeId, updateRequest.branches())));
                 })
                 .map(result -> true);
+    }
+
+    @Override
+    public Mono<EmployeeResponse> getEmployee(Long employeeId) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> amqpService.getUserBranches(Long.parseLong(userId)))
+                .zipWith(amqpService.getUserBranches(employeeId))
+                .map(tuple -> {
+                    if (!CollectionUtils.containsAny(tuple.getT2(), tuple.getT1())) {
+                        throw new NotPermittedException();
+                    }
+
+                    return tuple.getT2();
+                })
+                .zipWith(userRepository.findById(employeeId))
+                .flatMap(tuple -> {
+
+                    User employee = tuple.getT2();
+
+                    return roleRepository
+                            .findById(employee.id())
+                            .map(role -> new EmployeeResponse(
+                                    employee.id(),
+                                    employee.firstName(),
+                                    employee.lastName(),
+                                    employee.isActive(),
+                                    tuple.getT1(), // Branches List
+                                    role.name()));
+                });
     }
 
 }

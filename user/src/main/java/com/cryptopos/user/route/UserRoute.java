@@ -17,6 +17,7 @@ public class UserRoute {
         return RouterFunctions
                 .route(RequestPredicates.POST("/signup"), handler::signUp)
                 .andRoute(RequestPredicates.POST("/employee"), handler::createEmployee)
-                .andRoute(RequestPredicates.PUT("/employee/{employeeId}"), handler::updateEmployee);
+                .andRoute(RequestPredicates.PUT("/employee/{employeeId}"), handler::updateEmployee)
+                .andRoute(RequestPredicates.GET("/employee/{employeeId}"), handler::getEmployee);
     }
 }

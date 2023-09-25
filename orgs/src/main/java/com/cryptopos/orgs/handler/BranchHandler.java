@@ -91,4 +91,14 @@ public class BranchHandler {
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 });
     }
+
+    public Mono<ServerResponse> getBranchesByUser(ServerRequest request) {
+
+        return branchService
+                .getBranchesByUser()
+                .flatMap(response -> ServerResponse.ok().bodyValue(response))
+                .onErrorResume(error -> {
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
 }

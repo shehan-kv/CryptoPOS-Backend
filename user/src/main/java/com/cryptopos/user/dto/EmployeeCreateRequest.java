@@ -8,6 +8,6 @@ public record EmployeeCreateRequest(
         String email,
         String password,
         List<Long> branches,
-        String role) {
+        Role role) {
 
 }

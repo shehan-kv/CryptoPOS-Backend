@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 import com.cryptopos.orgs.dto.BranchResponse;
+import com.cryptopos.orgs.dto.BranchWithOrgIdResponse;
 import com.cryptopos.orgs.dto.BranchCurrencyResponse;
 import com.cryptopos.orgs.dto.BranchDetailsResponse;
 import com.cryptopos.orgs.entity.Branch;
@@ -39,6 +40,14 @@ public interface BranchRepository extends ReactiveCrudRepository<Branch, Long> {
             LIMIT :pageSize
                 """)
     Flux<BranchResponse> findByOrgIdAndUserId(Long orgId, Long userId, Long offset, Long pageSize);
+
+    @Query("""
+            SELECT b.id, b.location, b.org_id
+            FROM branches b
+            JOIN employee_branches eb ON eb.branch_id = b.id
+            WHERE eb.employee_id = :userId
+                """)
+    Flux<BranchWithOrgIdResponse> findAllByUser(Long userId);
 
     @Query("""
             SELECT COUNT(DISTINCT b.id)

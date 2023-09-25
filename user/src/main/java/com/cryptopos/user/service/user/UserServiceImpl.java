@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
                 })
                 .switchIfEmpty(
                         roleRepository
-                                .findByName(createRequest.role())
+                                .findByName(createRequest.role().toString())
                                 .zipWith(ReactiveSecurityContextHolder
                                         .getContext()
                                         .map(context -> context.getAuthentication().getName()))

@@ -223,4 +223,9 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
+    @Override
+    public Mono<Boolean> isLoggedIn() {
+        return Mono.just(true);
+    }
+
 }

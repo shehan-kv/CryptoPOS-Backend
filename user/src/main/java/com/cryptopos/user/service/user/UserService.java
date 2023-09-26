@@ -18,6 +18,8 @@ public interface UserService {
 
     Mono<Boolean> signUp(SignUpRequest signUpRequest);
 
+    Mono<Boolean> isLoggedIn();
+
     Mono<Boolean> createEmployee(EmployeeCreateRequest createRequest);
 
     Mono<Boolean> updateEmployee(Long employeeId, EmployeeUpdateRequest updateRequest);

@@ -42,6 +42,9 @@ public class SecurityConfig {
                         .pathMatchers("/signup")
                         .permitAll()
 
+                        .pathMatchers(HttpMethod.GET, "/is-logged-in")
+                        .authenticated()
+
                         .pathMatchers(HttpMethod.POST, "/employee")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
 

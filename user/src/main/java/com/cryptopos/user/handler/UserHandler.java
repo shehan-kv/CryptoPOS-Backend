@@ -102,4 +102,10 @@ public class UserHandler {
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 });
     }
+
+    public Mono<ServerResponse> isLoggedIn(ServerRequest request) {
+        return userService
+                .isLoggedIn()
+                .flatMap(result -> ServerResponse.ok().build());
+    }
 }

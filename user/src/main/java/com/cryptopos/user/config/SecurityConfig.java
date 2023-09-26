@@ -45,6 +45,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/employee")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
 
+                        .pathMatchers(HttpMethod.GET, "/employee")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
+
                         .pathMatchers(HttpMethod.PUT, "/employee/{employeeId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER")
 

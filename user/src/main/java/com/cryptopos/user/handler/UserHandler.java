@@ -39,6 +39,7 @@ public class UserHandler {
                 .flatMap(createRequest -> userService.createEmployee(createRequest))
                 .flatMap(result -> ServerResponse.ok().build())
                 .onErrorResume(error -> {
+
                     if (error instanceof NotPermittedException) {
                         return ServerResponse.status(HttpStatus.FORBIDDEN).build();
                     }
@@ -77,8 +78,23 @@ public class UserHandler {
     public Mono<ServerResponse> getEmployee(ServerRequest request) {
         return userService
                 .getEmployee(Long.parseLong(request.pathVariable("employeeId")))
-                .flatMap(result -> ServerResponse.ok().build())
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
                 .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+    }
+
+    public Mono<ServerResponse> getEmployees(ServerRequest request) {
+        return userService
+                .getEmployees(request.queryParam("page"), request.queryParam("size"))
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
+                .onErrorResume(error -> {
+                    System.out.println(error.getMessage());
+
                     if (error instanceof NotPermittedException) {
                         return ServerResponse.status(HttpStatus.FORBIDDEN).build();
                     }

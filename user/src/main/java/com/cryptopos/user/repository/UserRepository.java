@@ -5,9 +5,11 @@ import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
+import com.cryptopos.user.dto.EmployeeResponse;
 import com.cryptopos.user.dto.UserDetailsAuthResult;
 import com.cryptopos.user.entity.User;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface UserRepository extends ReactiveCrudRepository<User, Long> {
@@ -35,4 +37,12 @@ public interface UserRepository extends ReactiveCrudRepository<User, Long> {
             @Param("isActive") boolean isActive,
             @Param("roleId") Long roleId);
 
+    @Query("""
+            SELECT u.id, u.is_active, u.is_verified,
+            u.first_name, u.last_name, r.name AS role
+            FROM USERS u
+            JOIN ROLES r ON r.id = u.role_id
+            WHERE u.id IN (:ids)
+            """)
+    Flux<EmployeeResponse> findAllEmployeesById(Iterable<Long> ids);
 }

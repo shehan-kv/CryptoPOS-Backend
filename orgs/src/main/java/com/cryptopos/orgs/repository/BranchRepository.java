@@ -68,4 +68,5 @@ public interface BranchRepository extends ReactiveCrudRepository<Branch, Long> {
 
     @Query("SELECT org_id FROM branches WHERE id = :branchId")
     Mono<Long> findOrgIdByBranchId(Long branchId);
+
 }

@@ -1,14 +1,19 @@
 package com.cryptopos.user.service.user;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.cryptopos.user.dto.EmployeeBranchesAddRequest;
 import com.cryptopos.user.dto.EmployeeCreateRequest;
 import com.cryptopos.user.dto.EmployeeResponse;
+import com.cryptopos.user.dto.EmployeeWithBranchesResponse;
 import com.cryptopos.user.dto.EmployeeUpdateRequest;
+import com.cryptopos.user.dto.Page;
 import com.cryptopos.user.dto.SignUpRequest;
 import com.cryptopos.user.entity.Role;
 import com.cryptopos.user.entity.User;
@@ -118,7 +123,13 @@ public class UserServiceImpl implements UserService {
                                             true,
                                             role.id());
 
-                                    return userRepository.save(newEmployee);
+                                    return userRepository
+                                            .save(newEmployee)
+                                            .flatMap(savedUser -> {
+                                                HashMap<Long, List<Long>> requestMap = new HashMap<>();
+                                                requestMap.put(savedUser.id(), createRequest.branches());
+                                                return amqpService.setUserBranches(requestMap);
+                                            });
                                 }))
                 .flatMap(savedUser -> Mono.just(true));
     }
@@ -143,20 +154,25 @@ public class UserServiceImpl implements UserService {
                                     updateRequest.lastName(),
                                     updateRequest.isActive(),
                                     role.id())
-                            .flatMap(result -> amqpService.setUserBranches(
-                                    new EmployeeBranchesAddRequest(employeeId, updateRequest.branches())));
+                            .flatMap(result -> {
+
+                                HashMap<Long, List<Long>> requestMap = new HashMap<>();
+                                requestMap.put(employeeId, updateRequest.branches());
+                                return amqpService.setUserBranches(requestMap);
+                            });
                 })
                 .map(result -> true);
     }
 
     @Override
-    public Mono<EmployeeResponse> getEmployee(Long employeeId) {
+    public Mono<EmployeeWithBranchesResponse> getEmployee(Long employeeId) {
         return ReactiveSecurityContextHolder
                 .getContext()
                 .map(context -> context.getAuthentication().getName())
                 .flatMap(userId -> amqpService.getUserBranches(Long.parseLong(userId)))
                 .zipWith(amqpService.getUserBranches(employeeId))
                 .map(tuple -> {
+
                     if (!CollectionUtils.containsAny(tuple.getT2(), tuple.getT1())) {
                         throw new NotPermittedException();
                     }
@@ -169,14 +185,41 @@ public class UserServiceImpl implements UserService {
                     User employee = tuple.getT2();
 
                     return roleRepository
-                            .findById(employee.id())
-                            .map(role -> new EmployeeResponse(
+                            .findById(employee.roleId())
+                            .map(role -> new EmployeeWithBranchesResponse(
                                     employee.id(),
                                     employee.firstName(),
                                     employee.lastName(),
                                     employee.isActive(),
                                     tuple.getT1(), // Branches List
                                     role.name()));
+
+                });
+    }
+
+    @Override
+    public Mono<Page<EmployeeResponse>> getEmployees(Optional<String> pageNum, Optional<String> pageSize) {
+
+        Long pageNumLong = Math.max(Long.parseLong(pageNum.orElse("1")), 1);
+        Long pageSizeLong = Math.max(Long.parseLong(pageSize.orElse("20")), 1);
+        Long offset = (pageNumLong - 1) * pageSizeLong;
+
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> amqpService
+                        .getEmployeeBranchInfo(List.of(Long.parseLong(userId), offset, pageSizeLong)))
+                .flatMap(employeeInfo -> {
+
+                    Long totalEmployees = employeeInfo.keySet().iterator().next();
+                    List<Long> employeeList = employeeInfo.values().iterator().next();
+
+                    Long pageCount = (long) Math.max((int) (Math.ceil(totalEmployees) / pageSizeLong), 1);
+
+                    return userRepository
+                            .findAllEmployeesById(employeeList).collectList()
+                            .map(employeeDetails -> new Page<EmployeeResponse>(pageNumLong, pageSizeLong, pageCount,
+                                    employeeDetails));
                 });
     }
 

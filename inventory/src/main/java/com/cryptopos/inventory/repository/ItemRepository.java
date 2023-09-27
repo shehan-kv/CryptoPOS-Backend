@@ -29,6 +29,18 @@ public interface ItemRepository extends ReactiveCrudRepository<Item, Long> {
     Flux<ItemResult> findItemsByBranch(Long branchId, Long offset, Long pageSize);
 
     @Query("""
+            SELECT i.id, i.lookup_code, i.description, i.price, i.tax,
+            i.discount, i.in_stock,
+            t.type AS tax_type, d.type AS discount_type
+            FROM items i
+            JOIN tax_types t ON t.id = i.tax_type
+            JOIN discount_types d ON d.id = i.discount_type
+            WHERE i.branch_id = :branchId
+            AND i.lookup_code = :lookupCode
+                    """)
+    Flux<ItemResult> findItemByBranchAndLookupCode(Long branchId, String lookupCode);
+
+    @Query("""
             SELECT COUNT(id)
             FROM items
             WHERE branch_id = :branchId

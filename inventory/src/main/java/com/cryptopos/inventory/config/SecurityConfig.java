@@ -32,6 +32,9 @@ public class SecurityConfig {
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "INVENTORY_MANAGER", "BRANCH_MANAGER")
 
                         .pathMatchers(HttpMethod.GET, "/{branchId}")
+                        .authenticated()
+
+                        .pathMatchers(HttpMethod.GET, "/{branchId}/{lookupCode}")
                         .authenticated())
                 .formLogin(customizer -> customizer.disable())
                 .httpBasic(customizer -> customizer.disable())

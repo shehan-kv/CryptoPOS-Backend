@@ -1,0 +1,5 @@
+package com.cryptopos.user.dto;
+
+public enum Role {
+    ROLE_GLOBAL_ADMINISTRATOR, ROLE_BRANCH_MANAGER, ROLE_INVENTORY_MANAGER, ROLE_CASHIER
+}

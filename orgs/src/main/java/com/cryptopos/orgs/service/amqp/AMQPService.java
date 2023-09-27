@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.cryptopos.orgs.repository.BranchRepository;
 import com.cryptopos.orgs.repository.EmployeeRepository;
+import com.cryptopos.orgs.repository.OrgRepository;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,15 +19,22 @@ public class AMQPService {
 
     private final EmployeeRepository employeeRepository;
     private final BranchRepository branchRepository;
+    private final OrgRepository orgRepository;
 
-    public AMQPService(EmployeeRepository empRepository, BranchRepository brRepository) {
+    public AMQPService(EmployeeRepository empRepository, BranchRepository brRepository, OrgRepository orgRepository) {
         this.employeeRepository = empRepository;
         this.branchRepository = brRepository;
+        this.orgRepository = orgRepository;
     }
 
     @RabbitListener(queues = "user.branches")
     public Mono<List<Long>> getBranches(Long data) {
         return employeeRepository.getBranches(data).collectList();
+    }
+
+    @RabbitListener(queues = "user.orgs")
+    public Mono<List<Long>> getOrgs(Long data) {
+        return orgRepository.findOrgIdsByUser(data).collectList();
     }
 
     @RabbitListener(queues = "branch.org")

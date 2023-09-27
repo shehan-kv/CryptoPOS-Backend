@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.cryptopos.orders.dto.MetricsResponse;
 import com.cryptopos.orders.dto.OrderCreateRequest;
 import com.cryptopos.orders.dto.OrderResponse;
 import com.cryptopos.orders.dto.Page;
@@ -19,4 +20,6 @@ public interface OrderService {
     Mono<List<OrderResponse>> getLastOrdersByUser(Long branchId);
 
     Mono<Page<OrderResponse>> getOrdersByBranchId(Long branchId, Optional<String> pageNum, Optional<String> pageSize);
+
+    Mono<MetricsResponse> getMetricsByOrgId(Long orgId);
 }

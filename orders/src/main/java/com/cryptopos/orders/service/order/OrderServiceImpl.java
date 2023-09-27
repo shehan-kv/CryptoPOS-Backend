@@ -7,11 +7,13 @@ import java.util.Optional;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.cryptopos.orders.dto.MetricsResponse;
 import com.cryptopos.orders.dto.OrderCreateRequest;
 import com.cryptopos.orders.dto.OrderResponse;
 import com.cryptopos.orders.dto.Page;
 import com.cryptopos.orders.entity.Order;
 import com.cryptopos.orders.exceptions.NoItemsException;
+import com.cryptopos.orders.exceptions.NotFoundException;
 import com.cryptopos.orders.exceptions.NotPermittedException;
 import com.cryptopos.orders.repository.OrderRepository;
 import com.cryptopos.orders.service.amqp.AmqpService;
@@ -121,6 +123,26 @@ public class OrderServiceImpl implements OrderService {
                     Long pageCount = (long) Math.max((int) (Math.ceil(tuple.getT2()) / pageSizeLong), 1);
 
                     return new Page<OrderResponse>(pageNumLong, pageSizeLong, pageCount, orderList);
+                });
+    }
+
+    @Override
+    public Mono<MetricsResponse> getMetricsByOrgId(Long orgId) {
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> amqpService.getUserOrgs(Long.parseLong(userId)))
+                .map(orgIds -> {
+                    if (!orgIds.contains(orgId)) {
+                        throw new NotPermittedException();
+                    }
+
+                    return orgIds;
+                })
+                .flatMap(orgIds -> {
+                    return orderRepository
+                            .calculateMetricsForPastYear(orgId, LocalDateTime.now().minusYears(1))
+                            .switchIfEmpty(Mono.error(new NotFoundException()));
                 });
     }
 

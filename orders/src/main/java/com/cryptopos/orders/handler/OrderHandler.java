@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import com.cryptopos.orders.dto.OrderCreateRequest;
 import com.cryptopos.orders.exceptions.NoItemsException;
+import com.cryptopos.orders.exceptions.NotFoundException;
 import com.cryptopos.orders.exceptions.NotPermittedException;
 import com.cryptopos.orders.service.order.OrderService;
 
@@ -63,6 +64,25 @@ public class OrderHandler {
                 .onErrorResume(error -> {
                     if (error instanceof NotPermittedException) {
                         return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                });
+
+    }
+
+    public Mono<ServerResponse> getMetricsByOrgId(ServerRequest request) {
+
+        return orderService
+                .getMetricsByOrgId(Long.parseLong(request.pathVariable("orgId")))
+                .flatMap(result -> ServerResponse.ok().bodyValue(result))
+                .onErrorResume(error -> {
+                    if (error instanceof NotPermittedException) {
+                        return ServerResponse.status(HttpStatus.FORBIDDEN).build();
+                    }
+
+                    if (error instanceof NotFoundException) {
+                        return ServerResponse.notFound().build();
                     }
 
                     return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

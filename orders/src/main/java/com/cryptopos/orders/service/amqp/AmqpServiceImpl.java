@@ -48,4 +48,19 @@ public class AmqpServiceImpl implements AmqpService {
                 });
 
     }
+
+    @Override
+    public Mono<List<Long>> getUserOrgs(Long userId) {
+        RabbitConverterFuture<List<Long>> result = rabbitTemplate
+                .convertSendAndReceive("pos.exchange", "user.orgs", userId);
+
+        return Mono.fromFuture(() -> result)
+                .flatMap(response -> {
+                    if (response != null) {
+                        return Mono.just(response);
+                    } else {
+                        return Mono.error(new RuntimeException("RabbitMQ response is null"));
+                    }
+                });
+    }
 }

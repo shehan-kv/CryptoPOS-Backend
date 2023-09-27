@@ -22,6 +22,9 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(authorize -> authorize
+                        .pathMatchers(HttpMethod.GET, "/metrics/{orgId}")
+                        .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER")
+
                         .pathMatchers(HttpMethod.POST, "/{branchId}")
                         .hasAnyRole("GLOBAL_ADMINISTRATOR", "BRANCH_MANAGER", "INVENTORY_MANAGER", "CASHIER")
 

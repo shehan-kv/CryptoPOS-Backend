@@ -11,5 +11,7 @@ public interface AmqpService {
 
     Mono<List<Long>> getUserBranches(Long userId);
 
+    Mono<List<Long>> getUserOrgs(Long userId);
+
     Mono<Long> getBranchOrgId(Long branchId);
 }

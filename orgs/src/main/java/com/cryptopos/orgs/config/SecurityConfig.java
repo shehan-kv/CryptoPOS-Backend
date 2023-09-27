@@ -37,6 +37,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/branch")
                         .hasRole("GLOBAL_ADMINISTRATOR")
 
+                        .pathMatchers(HttpMethod.GET, "/branch/by-user")
+                        .authenticated()
+
                         .pathMatchers(HttpMethod.GET, "/branch/by-org/{orgId}")
                         .authenticated()
 

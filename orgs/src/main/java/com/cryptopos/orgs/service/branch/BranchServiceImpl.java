@@ -1,5 +1,7 @@
 package com.cryptopos.orgs.service.branch;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,9 +12,12 @@ import com.cryptopos.orgs.dto.BranchCreateRequest;
 import com.cryptopos.orgs.dto.BranchCreateResult;
 import com.cryptopos.orgs.dto.BranchCurrencyResponse;
 import com.cryptopos.orgs.dto.BranchResponse;
+import com.cryptopos.orgs.dto.BranchWithOrgIdResponse;
 import com.cryptopos.orgs.dto.BranchUpdateRequest;
 import com.cryptopos.orgs.dto.BranchUpdateResult;
+import com.cryptopos.orgs.dto.OrgResponse;
 import com.cryptopos.orgs.dto.Page;
+import com.cryptopos.orgs.dto.UserBranchResponse;
 import com.cryptopos.orgs.entity.Branch;
 import com.cryptopos.orgs.exception.NotPermittedException;
 import com.cryptopos.orgs.repository.BranchRepository;
@@ -141,6 +146,40 @@ public class BranchServiceImpl implements BranchService {
 
                     return branchRepository.findCurrencyById(branchId);
                 });
+    }
+
+    @Override
+    public Mono<List<UserBranchResponse>> getBranchesByUser() {
+
+        return ReactiveSecurityContextHolder
+                .getContext()
+                .map(context -> context.getAuthentication().getName())
+                .flatMap(userId -> {
+
+                    return orgRepository
+                            .findAllOrgsByUser(Long.parseLong(userId)).collectList()
+                            .zipWith(branchRepository.findAllByUser(Long.parseLong(userId)).collectList());
+                })
+                .map(tuple -> {
+                    List<OrgResponse> orgs = tuple.getT1();
+                    List<BranchWithOrgIdResponse> branches = tuple.getT2();
+
+                    var branchResponseMap = new HashMap<Long, UserBranchResponse>();
+
+                    for (OrgResponse org : orgs) {
+
+                        branchResponseMap.put(org.id(),
+                                new UserBranchResponse(org.name(), new ArrayList<BranchResponse>()));
+                    }
+
+                    for (BranchWithOrgIdResponse branch : branches) {
+                        branchResponseMap.get(branch.orgId()).branches()
+                                .add(new BranchResponse(branch.id(), branch.location()));
+                    }
+
+                    return new ArrayList<UserBranchResponse>(branchResponseMap.values());
+                });
+
     }
 
 }

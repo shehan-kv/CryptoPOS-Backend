@@ -87,6 +87,9 @@ RABBITMQ_PASSWORD   :   Password to connect to RabbitMQ
 
 See the included `.sql` files for the schema.
 
+TODO:
+Include `.sql` files
+
 
 ## RabbitMQ Configuration
 
